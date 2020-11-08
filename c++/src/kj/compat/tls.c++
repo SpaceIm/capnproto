@@ -266,7 +266,7 @@ private:
   kj::Promise<size_t> sslCall(Func&& func) {
     if (disconnected) return size_t(0);
 
-    ssize_t result = func();
+    auto result = func();
 
     if (result > 0) {
       return result;

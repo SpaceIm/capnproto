@@ -41,6 +41,29 @@ else()
   set(CAPNP_LITE_FLAG)
 endif()
 
+set(WITH_OPENSSL "AUTO" CACHE STRING
+  "Whether or not to build libkj-tls by linking against openssl")
+# define list of values GUI will offer for the variable
+set_property(CACHE WITH_OPENSSL PROPERTY STRINGS AUTO ON OFF)
+
+# shadow cache variable original value with ON/OFF,
+# so from now on OpenSSL-specific code just has to check:
+#     if (WITH_OPENSSL)
+#         ...
+#     endif()
+if (CAPNP_LITE)
+  set(WITH_OPENSSL OFF)
+elseif (WITH_OPENSSL STREQUAL "AUTO")
+  find_package(OpenSSL COMPONENTS Crypto SSL)
+  if (OPENSSL_FOUND)
+    set(WITH_OPENSSL ON)
+  else()
+    set(WITH_OPENSSL OFF)
+  endif()
+elseif (WITH_OPENSSL)
+  find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
+endif()
+
 if(MSVC)
   # TODO(cleanup): Enable higher warning level in MSVC, but make sure to test
   #   build with that warning level and clean out false positives.
